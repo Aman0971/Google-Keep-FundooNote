@@ -7,7 +7,7 @@ import org.fundoonotes.dto.response.UserResponseDTO;
 public interface UserService {
     UserResponseDTO register(UserRequestDTO requestDto);
 
-    String verifyOtp(VerifyOtpRequestDTO requestDTO);
+    //String verifyOtp(VerifyOtpRequestDTO requestDTO);
 
     LoginResponseDTO login(LoginRequestDTO requestDto);
 

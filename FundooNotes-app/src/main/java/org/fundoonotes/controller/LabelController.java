@@ -2,10 +2,12 @@ package org.fundoonotes.controller;
 
 import org.fundoonotes.dto.request.LabelRequestDTO;
 import org.fundoonotes.dto.response.LabelResponseDTO;
+import org.fundoonotes.dto.response.NoteResponseDTO;
 import org.fundoonotes.service.LabelService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.fundoonotes.dto.response.NoteResponseDTO;
 
 import java.util.List;
 
@@ -49,4 +51,22 @@ import java.util.List;
             );
         }
 
+        @DeleteMapping("/{labelId}/notes/{noteId}")
+        public ResponseEntity<String> removeLabelFromNote(
+                @PathVariable Long labelId,
+                @PathVariable Long noteId) {
+
+            return ResponseEntity.ok(
+                    labelService.removeLabelFromNote(noteId, labelId)
+            );
+        }
+
+        @GetMapping("/{labelId}/notes")
+        public ResponseEntity<List<NoteResponseDTO>> getNotesByLabel(
+                @PathVariable Long labelId) {
+
+            return ResponseEntity.ok(
+                    labelService.getNotesByLabel(labelId)
+            );
+        }
     }

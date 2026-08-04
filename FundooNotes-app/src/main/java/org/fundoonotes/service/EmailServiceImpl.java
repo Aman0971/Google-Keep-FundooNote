@@ -1,8 +1,11 @@
 package org.fundoonotes.service;
 
+import jakarta.mail.internet.MimeMessage;
+import org.fundoonotes.model.Note;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
     @Service
@@ -16,13 +19,171 @@ import org.springframework.stereotype.Service;
 
             try {
 
-                System.out.println("Sending mail to : " + to);
+                MimeMessage message = mailSender.createMimeMessage();
 
-                SimpleMailMessage message = new SimpleMailMessage();
+                MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-                message.setTo(to);
-                message.setSubject("Fundoo Notes OTP Verification");
-                message.setText("Your OTP is : " + otp);
+                helper.setTo(to);
+
+                helper.setSubject("Fundoo Notes - Verify Your Email");
+
+                String html = """
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Verify Email</title>
+</head>
+
+<body style="
+margin:0;
+padding:40px;
+background:#f3f4f6;
+font-family:Arial,Helvetica,sans-serif;
+">
+
+<table width="100%%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center">
+
+<table width="600" cellpadding="0" cellspacing="0"
+style="
+background:#ffffff;
+border-radius:12px;
+overflow:hidden;
+box-shadow:0 4px 15px rgba(0,0,0,0.08);
+">
+
+<!-- Header -->
+
+<tr>
+<td align="center"
+style="
+background:#4285F4;
+padding:20px;
+font-size:24px;
+font-weight:bold;
+color:white;
+">
+
+📒 Fundoo Notes
+
+</td>
+</tr>
+
+<!-- Title -->
+
+<tr>
+<td align="center"
+style="
+padding:28px 35px 10px;
+font-size:24px;
+font-weight:bold;
+color:#202124;
+">
+
+🔐 Verify Your Email
+
+</td>
+</tr>
+
+<!-- Description -->
+
+<tr>
+<td align="center"
+style="
+padding:0 40px;
+font-size:15px;
+color:#5f6368;
+line-height:24px;
+">
+
+Use the following One-Time Password (OTP) to verify your
+Fundoo Notes account.
+
+</td>
+</tr>
+
+<!-- OTP Box -->
+
+<tr>
+<td align="center"
+style="padding:28px;">
+
+<div
+style="
+display:inline-block;
+padding:18px 40px;
+background:#f8f9fa;
+border:2px dashed #4285F4;
+border-radius:10px;
+font-size:34px;
+font-weight:bold;
+letter-spacing:8px;
+color:#202124;
+">
+
+%s
+
+</div>
+
+</td>
+</tr>
+
+<!-- Info -->
+
+<tr>
+<td
+align="center"
+style="
+padding:0 40px 24px;
+font-size:14px;
+color:#5f6368;
+line-height:22px;
+">
+
+This OTP is valid for <b>10 minutes</b>.
+
+Do not share this code with anyone.
+
+</td>
+</tr>
+
+<!-- Footer -->
+
+<tr>
+<td
+style="
+background:#f8f9fa;
+padding:18px;
+text-align:center;
+font-size:13px;
+color:#6b7280;
+line-height:20px;
+">
+
+If you didn't request this verification,
+you can safely ignore this email.
+
+<br><br>
+
+© 2026 Fundoo Notes
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+""".formatted(otp);
+
+                helper.setText(html, true);
 
                 mailSender.send(message);
 
@@ -31,8 +192,512 @@ import org.springframework.stereotype.Service;
             } catch (Exception e) {
 
                 System.out.println("Mail Sending Failed");
+
                 e.printStackTrace();
 
             }
+
+        }
+        @Override
+        public void sendReminderMail(String to, Note note) {
+
+            try {
+
+                MimeMessage message = mailSender.createMimeMessage();
+
+                MimeMessageHelper helper = new MimeMessageHelper(message);
+
+                helper.setTo(to);
+
+                helper.setSubject("Fundoo Notes Reminder");
+                String html = """
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Fundoo Notes Reminder</title>
+</head>
+
+<body style="
+margin:0;
+padding:35px;
+background:#f3f4f6;
+font-family:Arial,Helvetica,sans-serif;
+">
+
+<table width="100%%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center">
+
+<table width="620" cellpadding="0" cellspacing="0"
+style="
+background:#ffffff;
+border-radius:12px;
+overflow:hidden;
+box-shadow:0 4px 15px rgba(0,0,0,0.08);
+">
+
+<!-- Header -->
+
+<tr>
+<td align="center"
+style="
+background:#4f8df7;
+padding:22px;
+color:white;
+font-size:26px;
+font-weight:bold;
+">
+
+🔔 Fundoo Notes
+
+</td>
+</tr>
+
+<!-- Title -->
+
+<tr>
+<td align="center"
+style="
+padding:28px 40px 10px;
+font-size:26px;
+font-weight:bold;
+color:#202124;
+">
+
+Reminder Notification
+
+</td>
+</tr>
+
+<!-- Description -->
+
+<tr>
+<td align="center"
+style="
+padding:0 50px;
+font-size:15px;
+color:#5f6368;
+line-height:26px;
+">
+
+This is a reminder for one of your notes.
+Don't forget to review it.
+
+</td>
+</tr>
+
+<!-- Note Card -->
+
+<tr>
+<td style="padding:28px 50px;">
+
+<table width="100%%"
+style="
+border:1px solid #e5e7eb;
+border-radius:10px;
+background:#fafafa;
+">
+
+<tr>
+<td style="
+padding:14px 18px 4px;
+font-size:13px;
+font-weight:bold;
+color:#6b7280;
+letter-spacing:1px;
+">
+NOTE TITLE
+</td>
+</tr>
+
+<tr>
+<td style="
+padding:0 18px 14px;
+font-size:21px;
+font-weight:bold;
+color:#202124;
+line-height:28px;
+">
+%s
+</td>
+</tr>
+
+<tr>
+<td style="
+padding:0 18px;
+font-size:13px;
+font-weight:bold;
+color:#6b7280;
+letter-spacing:1px;
+">
+
+DESCRIPTION
+
+</td>
+</tr>
+
+<tr>
+<td style="
+padding:0 18px 18px;
+font-size:15px;
+color:#444;
+line-height:24px;
+">
+
+%s
+
+</td>
+</tr>
+
+<tr>
+<td style="
+padding:0 18px;
+font-size:13px;
+font-weight:bold;
+color:#6b7280;
+letter-spacing:1px;
+">
+
+REMINDER TIME
+
+</td>
+</tr>
+
+<tr>
+<td style="
+padding:0 18px 22px;
+font-size:15px;
+font-weight:bold;
+color:#202124;
+">
+
+%s
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+
+<!-- Button -->
+
+<tr>
+<td align="center"
+style="padding:10px 40px 32px;">
+
+<a
+href="http://localhost:4200/login"
+style="
+background:#4f8df7;
+color:white;
+text-decoration:none;
+padding:13px 36px;
+border-radius:8px;
+font-size:15px;
+font-weight:bold;
+display:inline-block;
+">
+
+Open Fundoo Notes
+
+</a>
+
+</td>
+</tr>
+
+<!-- Footer -->
+
+<tr>
+<td
+style="
+background:#f8f9fa;
+padding:22px;
+text-align:center;
+color:#6b7280;
+font-size:13px;
+line-height:22px;
+">
+
+This reminder was generated from your
+<b>Fundoo Notes</b> account.
+
+<br><br>
+
+© 2026 Fundoo Notes • Stay Organized • Never Miss Anything
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+""".formatted(
+                        note.getTitle(),
+                        note.getDescription(),
+                        note.getReminderTime()
+                );
+
+                helper.setText(html, true);
+
+                mailSender.send(message);
+
+                System.out.println("Reminder Mail Sent Successfully");
+
+            } catch (Exception e) {
+
+                System.out.println("Reminder Mail Failed");
+
+                e.printStackTrace();
+
+            }
+        }
+
+        @Override
+        public void sendCollaboratorMail(
+                String to,
+                String ownerName,
+                String ownerEmail,
+                String noteTitle) {
+
+            try {
+
+                MimeMessage message = mailSender.createMimeMessage();
+
+                MimeMessageHelper helper = new MimeMessageHelper(message);
+
+                helper.setTo(to);
+
+                helper.setSubject("A note has been shared with you");
+
+                String html = """
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Fundoo Notes</title>
+</head>
+
+<body style="
+margin:0;
+padding:40px;
+background:#f3f4f6;
+font-family:Arial,Helvetica,sans-serif;
+">
+
+<table width="100%%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center">
+
+<table width="620" cellpadding="0" cellspacing="0"
+style="
+background:#ffffff;
+border-radius:12px;
+overflow:hidden;
+box-shadow:0 4px 15px rgba(0,0,0,0.08);
+">
+
+<!-- Header -->
+
+<tr>
+<td align="center"
+style="
+background:#4285F4;
+padding:20px;
+color:white;
+font-size:24px;
+font-weight:bold;
+">
+
+📒 Fundoo Notes
+
+</td>
+</tr>
+
+<!-- Greeting -->
+
+<tr>
+<td align="center"
+style="
+padding:24px 35px 8px;
+font-size:25px;
+font-weight:bold;
+color:#202124;
+">
+
+👋 A note has been shared with you
+
+</td>
+</tr>
+
+<!-- Description -->
+
+<tr>
+<td align="center"
+style="
+padding:0 40px;
+font-size:16px;
+color:#5f6368;
+line-height:24px;
+">
+
+<b style="color:#202124;">%s</b>
+
+(<a href="mailto:%s"
+style="
+color:#1a73e8;
+text-decoration:none;
+">
+%s
+</a>)
+
+has invited you to collaborate on a note.
+
+</td>
+</tr>
+
+<!-- Note Card -->
+
+<tr>
+<td style="padding:22px 40px 16px;;">
+
+<table width="100%%"
+style="
+border:1px solid #e5e7eb;
+border-radius:10px;
+background:#fafafa;
+">
+
+<tr>
+<td
+style="
+padding:14px;
+font-size:12px;
+color:#6b7280;
+font-weight:bold;
+letter-spacing:1px;
+">
+
+NOTE TITLE
+
+</td>
+</tr>
+
+<tr>
+<td
+style="
+padding:0 14px 14px;
+font-size:20px;
+font-weight:bold;
+color:#202124;
+">
+
+%s
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+
+
+<!-- Button -->
+
+<tr>
+
+<td
+align="center"
+style="padding:18px 40px 24px;">
+
+<a
+href="http://localhost:4200/login"
+style="
+background:#1a73e8;
+color:white;
+text-decoration:none;
+padding:12px 34px;
+font-size:15px;
+border-radius:6px;
+font-weight:bold;
+display:inline-block;
+">
+
+Open Note
+
+</a>
+
+</td>
+
+</tr>
+
+<!-- Footer -->
+
+<tr>
+
+<td
+style="
+background:#f8f9fa;
+text-align:center;
+color:#6b7280;
+padding:18px;
+font-size:13px;
+line-height:20px;
+">
+
+You received this email because
+<b>%s</b> shared a note with you using
+<b>Fundoo Notes</b>.
+
+<br><br>
+
+© 2026 Fundoo Notes • Read • Edit • Collaborate
+
+</td>
+
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+""".formatted(
+
+                        ownerName,
+                        ownerEmail,
+                        ownerEmail,
+                        noteTitle,
+                        ownerName,
+                        ownerEmail,
+                        ownerName
+
+                );
+
+                helper.setText(html, true);
+
+                mailSender.send(message);
+
+                System.out.println("Collaborator Mail Sent");
+
+            } catch (Exception e) {
+
+                e.printStackTrace();
+
+            }
+
         }
     }

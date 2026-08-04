@@ -20,4 +20,10 @@ public interface NoteService {
     String setReminder(Long noteId, ReminderRequestDTO dto);
     String removeReminder(Long noteId);
     List<NoteResponseDTO> getReminderNotes();
+    List<NoteResponseDTO> getArchivedNotes();
+    List<NoteResponseDTO> getTrashNotes();
+    String restoreNote(Long id);
+    String deleteForever(Long id);
+
+    String changeColor(Long id, String color);
     }

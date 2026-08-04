@@ -26,11 +26,11 @@ public class UserController {
         return new ResponseEntity<>(register, HttpStatus.CREATED);
     }
 
-    @PostMapping("/verify")
-    public ResponseEntity<String> verifyOtp(@RequestBody VerifyOtpRequestDTO requestDTO){
-        return ResponseEntity.ok(userService.verifyOtp(requestDTO)
-        );
-    }
+//    @PostMapping("/verify")
+//    public ResponseEntity<String> verifyOtp(@RequestBody VerifyOtpRequestDTO requestDTO){
+//        return ResponseEntity.ok(userService.verifyOtp(requestDTO)
+//        );
+//    }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO requestDto){

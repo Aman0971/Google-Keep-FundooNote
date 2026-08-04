@@ -24,6 +24,8 @@ import java.util.Set;
         @Column(length = 5000)
         private String description;
 
+        private String color;
+
         private boolean pinned;
 
         private boolean archived;
@@ -48,5 +50,8 @@ import java.util.Set;
 
     @Column(name = "reminder_time")
     private LocalDateTime reminderTime;
+
+    @Column(name = "reminder_sent",nullable = false)
+    private boolean reminderSent = false;
     }
 

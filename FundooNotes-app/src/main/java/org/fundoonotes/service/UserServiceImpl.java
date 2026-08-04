@@ -62,23 +62,23 @@ public class UserServiceImpl implements UserService {
         user.setEmail(requestDto.getEmail());
         user.setPassword(passwordEncoder.encode(requestDto.getPassword()));
 
-        user.setVerified(false);
+        user.setVerified(true);
 
-       // OTP Generate
-        String otp = String.format("%06d", new Random().nextInt(999999));
-        user.setOtp(otp);
-
-        // OTP 5 minute ke liye valid
-        user.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
+//       // OTP Generate
+//        String otp = String.format("%06d", new Random().nextInt(999999));
+//        user.setOtp(otp);
+//
+//        // OTP 5 minute ke liye valid
+//        user.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
 
         User savedUser = userRepository.save(user);
-
-        System.out.println("Generated OTP : " + otp);
-
-        emailProducer.sendEmail(
-                user.getEmail(),
-                otp
-        );
+//
+//        System.out.println("Generated OTP : " + otp);
+//
+//        emailProducer.sendEmail(
+//                user.getEmail(),
+//                otp
+//        );
 
         return new UserResponseDTO(
                 savedUser.getId(),
@@ -88,27 +88,27 @@ public class UserServiceImpl implements UserService {
         );
     }
 
-    @Override
-    public String verifyOtp(VerifyOtpRequestDTO requestDTO) {
-
-        User user = userRepository.findByEmail(requestDTO.getEmail())
-                .orElseThrow(() -> new RuntimeException("User Not Found"));
-
-        if (!user.getOtp().equals(requestDTO.getOtp())) {
-            throw new RuntimeException("Invalid OTP");
-        }
-        if (user.getOtpExpiry().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("OTP Expired");
-        }
-
-        user.setVerified(true);
-        user.setOtp(null);
-        user.setOtpExpiry(null);
-
-        userRepository.save(user);
-
-        return "Email Verified Successfully";
-    }
+//    @Override
+//    public String verifyOtp(VerifyOtpRequestDTO requestDTO) {
+//
+//        User user = userRepository.findByEmail(requestDTO.getEmail())
+//                .orElseThrow(() -> new RuntimeException("User Not Found"));
+//
+//        if (!user.getOtp().equals(requestDTO.getOtp())) {
+//            throw new RuntimeException("Invalid OTP");
+//        }
+//        if (user.getOtpExpiry().isBefore(LocalDateTime.now())) {
+//            throw new RuntimeException("OTP Expired");
+//        }
+//
+//        user.setVerified(true);
+//        user.setOtp(null);
+//        user.setOtpExpiry(null);
+//
+//        userRepository.save(user);
+//
+//        return "Email Verified Successfully";
+//    }
 
     @Override
     public LoginResponseDTO login(LoginRequestDTO requestDto) {
@@ -130,7 +130,12 @@ public class UserServiceImpl implements UserService {
 //                user.getEmail()
 //        );
         String token = jwtTokenProvider.generateToken(user.getEmail());
-        return new LoginResponseDTO(token, "Login Successful"
+        return new LoginResponseDTO(
+                token,
+                "Login Successful" ,
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail()
         );
     }
     @Override

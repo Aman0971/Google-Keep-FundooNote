@@ -67,7 +67,6 @@ import java.util.List;
 
     @GetMapping("/search")
     public ResponseEntity<List<NoteResponseDTO>> searchNotes(@RequestParam String keyword){
-
         return ResponseEntity.ok(noteService.searchNotes(keyword)
         );
     }
@@ -90,6 +89,43 @@ import java.util.List;
     public ResponseEntity<List<NoteResponseDTO>> getReminderNotes(){
 
         return ResponseEntity.ok(noteService.getReminderNotes()
+        );
+    }
+
+    @GetMapping("/archive")
+    public ResponseEntity<List<NoteResponseDTO>> getArchivedNotes() {
+
+        return ResponseEntity.ok(
+                noteService.getArchivedNotes()
+        );
+    }
+    @GetMapping("/trash")
+    public ResponseEntity<List<NoteResponseDTO>> getTrashNotes() {
+
+        return ResponseEntity.ok(
+                noteService.getTrashNotes()
+        );
+    }
+    @PatchMapping("/restore/{id}")
+    public ResponseEntity<String> restoreNote(@PathVariable Long id) {
+
+        return ResponseEntity.ok(noteService.restoreNote(id));
+
+    }
+
+    @DeleteMapping("/delete-forever/{id}")
+    public ResponseEntity<String> deleteForever(@PathVariable Long id) {
+
+        return ResponseEntity.ok(noteService.deleteForever(id));
+
+    }
+    @PatchMapping("/color/{id}")
+    public ResponseEntity<String> changeColor(
+            @PathVariable Long id,
+            @RequestBody NoteRequestDTO dto) {
+
+        return ResponseEntity.ok(
+                noteService.changeColor(id, dto.getColor())
         );
     }
     }

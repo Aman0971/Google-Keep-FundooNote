@@ -24,4 +24,6 @@ public interface NoteCollaboratorRepository
             Note note,
             User collaborator
     );
+
+
 }

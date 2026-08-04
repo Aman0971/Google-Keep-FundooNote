@@ -13,4 +13,8 @@ public class LoginResponseDTO {
 //    private String email;
       private String token;
       private String message;
+
+      private String firstName;
+      private String lastName;
+      private String email;
 }

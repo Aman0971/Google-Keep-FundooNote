@@ -1,7 +1,9 @@
 package org.fundoonotes.service;
 
+import jakarta.transaction.Transactional;
 import org.fundoonotes.dto.request.CollaboratorRequestDTO;
 import org.fundoonotes.dto.response.CollaboratorResponseDTO;
+import org.fundoonotes.messaging.EmailProducer;
 import org.fundoonotes.model.Note;
 import org.fundoonotes.model.NoteCollaborator;
 import org.fundoonotes.model.User;
@@ -12,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+
 import java.util.List;
 
 @Service
@@ -20,15 +23,21 @@ public class CollaboratorServiceImpl implements CollaboratorService {
     private final NoteRepository noteRepository;
     private final UserRepository userRepository;
     private final NoteCollaboratorRepository collaboratorRepository;
+//    private final EmailProducer emailProducer;
+    private final EmailService emailService;
 
     public CollaboratorServiceImpl(
             NoteRepository noteRepository,
             UserRepository userRepository,
-            NoteCollaboratorRepository collaboratorRepository) {
+            NoteCollaboratorRepository collaboratorRepository,
+//        EmailProducer emailProducer,
+        EmailService emailService){
 
         this.noteRepository = noteRepository;
         this.userRepository = userRepository;
         this.collaboratorRepository = collaboratorRepository;
+//        this.emailProducer = emailProducer;
+        this.emailService = emailService;
     }
 
     @Override
@@ -49,7 +58,17 @@ public class CollaboratorServiceImpl implements CollaboratorService {
             throw new RuntimeException("Only owner can add collaborators");
         }
 
-        User collaborator = userRepository.findByEmail(dto.getEmail())
+        // to make sure that owner can not make himself as collaborator.
+        if (owner.getEmail().equalsIgnoreCase(dto.getEmail().trim())) {
+            throw new RuntimeException("Owner cannot be collaborator");
+        }
+
+        // email normalize
+        String collaboratorEmail = dto.getEmail().trim().toLowerCase();
+//        User collaborator = userRepository.findByEmail(dto.getEmail())
+//                .orElseThrow(() -> new RuntimeException("Collaborator not found"));
+
+        User collaborator = userRepository.findByEmail(collaboratorEmail)
                 .orElseThrow(() -> new RuntimeException("Collaborator not found"));
 
         if (collaboratorRepository.existsByNoteAndCollaborator(note, collaborator)) {
@@ -61,6 +80,12 @@ public class CollaboratorServiceImpl implements CollaboratorService {
 
         collaboratorRepository.save(nc);
 
+        emailService.sendCollaboratorMail(
+                collaborator.getEmail(),
+                owner.getFirstName(),
+                owner.getEmail(),
+                note.getTitle()
+        );
         return new CollaboratorResponseDTO(
                 note.getId(),
                 collaborator.getEmail(),
@@ -68,6 +93,7 @@ public class CollaboratorServiceImpl implements CollaboratorService {
         );
     }
 
+    @Transactional
     @Override
     public String removeCollaborator(Long noteId, String email) {
 
@@ -95,6 +121,7 @@ public class CollaboratorServiceImpl implements CollaboratorService {
                                 new RuntimeException("Collaborator not found"));
 
         collaboratorRepository.delete(noteCollaborator);
+        collaboratorRepository.flush();
 
         return "Collaborator Removed Successfully";
     }
