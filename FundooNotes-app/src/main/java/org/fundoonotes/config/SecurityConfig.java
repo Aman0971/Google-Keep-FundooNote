@@ -56,7 +56,7 @@ public class SecurityConfig {
                                 "/users/register",
                                 "/users/verify",
                                 "/users/login",
-                                "users/profile",
+                                "/users/profile",
                                 "/users/forgot-password",
                                 "/users/reset-password",
                                 "/swagger-ui/**",
