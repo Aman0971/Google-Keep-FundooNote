@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.mail.SimpleMailMessage;
+
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -26,12 +27,13 @@ import org.springframework.stereotype.Service;
 
                 MimeMessage message = mailSender.createMimeMessage();
 
-                MimeMessageHelper helper = new MimeMessageHelper(message, true);
+//                MimeMessageHelper helper = new MimeMessageHelper(message, true);
+                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
                 helper.setFrom(fromEmail);
                 helper.setTo(to);
 
-                helper.setSubject("Fundoo Notes - Verify Your Email");
+                helper.setSubject("Fundoo Notes - Password Reset OTP");
 
                 String html = """
 <!DOCTYPE html>
@@ -39,7 +41,7 @@ import org.springframework.stereotype.Service;
 
 <head>
 <meta charset="UTF-8">
-<title>Verify Email</title>
+<title>Password Reset OTP</title>
 </head>
 
 <body style="
@@ -73,7 +75,7 @@ font-weight:bold;
 color:white;
 ">
 
-📒 Fundoo Notes
+Fundoo Notes
 
 </td>
 </tr>
@@ -89,7 +91,7 @@ font-weight:bold;
 color:#202124;
 ">
 
-🔐 Verify Your Email
+Password Reset OTP
 
 </td>
 </tr>
@@ -105,8 +107,9 @@ color:#5f6368;
 line-height:24px;
 ">
 
-Use the following One-Time Password (OTP) to verify your
-Fundoo Notes account.
+Use the following One-Time Password (OTP) to reset your
+Fundoo Notes password.
+
 
 </td>
 </tr>
@@ -149,7 +152,7 @@ color:#5f6368;
 line-height:22px;
 ">
 
-This OTP is valid for <b>10 minutes</b>.
+This OTP is valid for <b>5 minutes</b>.
 
 Do not share this code with anyone.
 
@@ -169,12 +172,12 @@ color:#6b7280;
 line-height:20px;
 ">
 
-If you didn't request this verification,
+If you didn't request a password reset,
 you can safely ignore this email.
 
 <br><br>
 
-© 2026 Fundoo Notes
+&copy; 2026 Fundoo Notes
 
 </td>
 </tr>
@@ -193,7 +196,7 @@ you can safely ignore this email.
 
                 mailSender.send(message);
 
-                System.out.println("Mail Sent Successfully");
+                System.out.println("Mail Sent Successfully to " + to);
 
             } catch (Exception e) {
 
@@ -209,8 +212,10 @@ you can safely ignore this email.
 
                 MimeMessage message = mailSender.createMimeMessage();
 
-                MimeMessageHelper helper = new MimeMessageHelper(message);
+//                MimeMessageHelper helper = new MimeMessageHelper(message);
+                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
+                helper.setFrom(fromEmail);
                 helper.setTo(to);
 
                 helper.setSubject("Fundoo Notes Reminder");
@@ -476,8 +481,9 @@ This reminder was generated from your
 
                 MimeMessage message = mailSender.createMimeMessage();
 
-                MimeMessageHelper helper = new MimeMessageHelper(message);
+                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
+                helper.setFrom(fromEmail);
                 helper.setTo(to);
 
                 helper.setSubject("A note has been shared with you");
