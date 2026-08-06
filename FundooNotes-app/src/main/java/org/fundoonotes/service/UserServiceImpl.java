@@ -2,16 +2,20 @@ package org.fundoonotes.service;
 
 import org.fundoonotes.dto.request.*;
 import org.fundoonotes.dto.response.UserResponseDTO;
+
 import org.fundoonotes.messaging.EmailProducer;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+
 import org.fundoonotes.model.User;
 import org.fundoonotes.repository.UserRepository;
 import org.fundoonotes.security.JwtTokenProvider;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.fundoonotes.dto.response.LoginResponseDTO;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDateTime;
 import java.util.Random;
@@ -33,18 +37,19 @@ public class UserServiceImpl implements UserService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
-    private final EmailProducer emailProducer;
+//
+//    private final EmailProducer emailProducer;
 
 
 
     public UserServiceImpl(UserRepository userRepository, EmailService emailService, PasswordEncoder passwordEncoder,
-                           JwtTokenProvider jwtTokenProvider,EmailProducer emailProducer) {
+                           JwtTokenProvider jwtTokenProvider) {
 
         this.userRepository = userRepository;
         this.emailService = emailService;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
-        this.emailProducer = emailProducer;
+//        this.emailProducer = emailProducer;
 
     }
 
@@ -153,7 +158,9 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(user);
 
-        emailProducer.sendEmail(user.getEmail(), otp);
+        // Forgot password is user-facing and time-sensitive; send synchronously
+        // so the API does not return success when queue delivery fails silently.
+        emailService.sendOtp(user.getEmail(), otp);
 
         return "OTP Sent Successfully";
     }

@@ -3,6 +3,9 @@ package org.fundoonotes.service;
 import jakarta.mail.internet.MimeMessage;
 import org.fundoonotes.model.Note;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -13,6 +16,8 @@ import org.springframework.stereotype.Service;
 
         @Autowired
         private JavaMailSender mailSender;
+        @Value("${spring.mail.username}")
+        private String fromEmail;
 
         @Override
         public void sendOtp(String to, String otp) {
@@ -23,6 +28,7 @@ import org.springframework.stereotype.Service;
 
                 MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
+                helper.setFrom(fromEmail);
                 helper.setTo(to);
 
                 helper.setSubject("Fundoo Notes - Verify Your Email");
@@ -191,9 +197,7 @@ you can safely ignore this email.
 
             } catch (Exception e) {
 
-                System.out.println("Mail Sending Failed");
-
-                e.printStackTrace();
+                throw new RuntimeException("Failed to send OTP email", e);
 
             }
 
