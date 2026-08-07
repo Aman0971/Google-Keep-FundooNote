@@ -200,7 +200,12 @@ you can safely ignore this email.
                 System.out.println("Mail Sent Successfully to " + to);
 
             } catch (Exception e) {
-
+                e.printStackTrace();
+                System.out.println("========== OTP MAIL ERROR ==========");
+                System.out.println("TO: " + to);
+                System.out.println("FROM: " + fromEmail);
+                System.out.println("ERROR: " + e.getMessage());
+                System.out.println("====================================");
                 throw new RuntimeException("Failed to send OTP email", e);
 
             }
