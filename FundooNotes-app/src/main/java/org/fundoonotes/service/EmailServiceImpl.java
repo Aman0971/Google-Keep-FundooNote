@@ -402,20 +402,19 @@ you can safely ignore this email.
         throw new RuntimeException("Failed to send OTP email", e);
     }
 }
-        @Override
-        public void sendReminderMail(String to, Note note) {
+
+    @Override
+    public void sendReminderMail(String to, Note note) {
 
             try {
-
-                MimeMessage message = mailSender.createMimeMessage();
-
-//                MimeMessageHelper helper = new MimeMessageHelper(message);
-                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-                helper.setFrom(fromEmail);
-                helper.setTo(to);
-
-                helper.setSubject("Fundoo Notes Reminder");
+//                MimeMessage message = mailSender.createMimeMessage();
+//
+//                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+//
+//                helper.setFrom(fromEmail);
+//                helper.setTo(to);
+//
+//                helper.setSubject("Fundoo Notes Reminder");
                 String html = """
 <!DOCTYPE html>
 <html>
@@ -651,10 +650,11 @@ This reminder was generated from your
                         note.getDescription(),
                         note.getReminderTime()
                 );
+//                helper.setText(html, true);
+//                mailSender.send(message);
 
-                helper.setText(html, true);
-
-                mailSender.send(message);
+                // SMTP mat use karo — Brevo HTTPS API
+                sendViaBrevo(to, "Fundoo Notes Reminder", html);
 
                 System.out.println("Reminder Mail Sent Successfully");
 
@@ -675,16 +675,14 @@ This reminder was generated from your
                 String noteTitle) {
 
             try {
-
-                MimeMessage message = mailSender.createMimeMessage();
-
-                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-                helper.setFrom(fromEmail);
-                helper.setTo(to);
-
-                helper.setSubject("A note has been shared with you");
-
+//                MimeMessage message = mailSender.createMimeMessage();
+//
+//                MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+//
+//                helper.setFrom(fromEmail);
+//                helper.setTo(to);
+//
+//                helper.setSubject("A note has been shared with you");
                 String html = """
 <!DOCTYPE html>
 <html>
@@ -893,10 +891,10 @@ You received this email because
                         ownerName
 
                 );
-
-                helper.setText(html, true);
-
-                mailSender.send(message);
+//                helper.setText(html, true);
+//                mailSender.send(message);
+                // SMTP mat use karo — Brevo HTTPS API
+                sendViaBrevo(to, "A note has been shared with you", html);
 
                 System.out.println("Collaborator Mail Sent");
 
@@ -906,5 +904,61 @@ You received this email because
 
             }
 
+        }
+
+        /**
+         * Common Brevo API sender.
+         * File ke END pe — class ke last closing brace } se pehle.
+         */
+        private void sendViaBrevo(String to, String subject, String html) {
+            try {
+                String safeHtml = html
+                        .replace("\\", "\\\\")
+                        .replace("\"", "\\\"")
+                        .replace("\n", "\\n")
+                        .replace("\r", "");
+
+                String jsonBody = """
+                        {
+                          "sender": {
+                            "name": "Fundoo Notes",
+                            "email": "%s"
+                          },
+                          "to": [
+                            { "email": "%s" }
+                          ],
+                          "subject": "%s",
+                          "htmlContent": "%s"
+                        }
+                        """.formatted(fromEmail, to, subject, safeHtml);
+
+                java.net.http.HttpRequest request = java.net.http.HttpRequest.newBuilder()
+                        .uri(java.net.URI.create("https://api.brevo.com/v3/smtp/email"))
+                        .header("accept", "application/json")
+                        .header("content-type", "application/json")
+                        .header("api-key", brevoApiKey)
+                        .POST(java.net.http.HttpRequest.BodyPublishers.ofString(jsonBody))
+                        .build();
+
+                java.net.http.HttpResponse<String> response =
+                        java.net.http.HttpClient.newHttpClient()
+                                .send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
+
+                if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                    System.out.println("========== BREVO MAIL ERROR ==========");
+                    System.out.println("TO: " + to);
+                    System.out.println("SUBJECT: " + subject);
+                    System.out.println("STATUS: " + response.statusCode());
+                    System.out.println("BODY: " + response.body());
+                    System.out.println("======================================");
+                    throw new RuntimeException("Failed to send email via Brevo");
+                }
+
+                System.out.println("Mail Sent Successfully to " + to + " | " + subject);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("Failed to send email via Brevo", e);
+            }
         }
     }
