@@ -59,6 +59,8 @@ import java.util.List;
             note.setTrashed(false);
             note.setReminderSent(false);
 
+            note.setReminderTime(dto.getReminderTime());
+
             note.setCreatedAt(LocalDateTime.now());
             note.setUpdatedAt(LocalDateTime.now());
 
